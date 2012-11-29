@@ -1,17 +1,9 @@
-/* 
-* 
-* 
-* 
-* 
-* 
+/* ImageMapper Wordpress frontend script
 */
 var Image;
 var Canvas, Ctx;
-var Areas = [];
-Areas[0] = [];
 
 jQuery(function($) {
-	console.log($.mapster);
 	$('img[usemap]').mapster({
 		fillColor: 'ffffff',
 		fillOpacity: 0.4,
@@ -23,11 +15,29 @@ jQuery(function($) {
 		mapKey: 'data-mapkey',
 		listSelectedAttribute: 'checked',
 		boundList: jQuery('.area-list-element > input[type=checkbox], .area-list-element'),
-		onClick: AreaClicked
+		onClick: AreaClicked,
+		singleSelect: true
 	});
+	
+	$('#imgmap-dialog').dialog({ 
+		autoOpen: false, 
+		zIndex: 10000,
+		width: 800,
+		height: 600,
+		position: {
+			of: $('#image')
+		}
+		});
 });
 
 function AreaClicked(data) {
-	console.log(data);
+	jQuery('#imgmap-dialog').dialog('option', 'title', jQuery('area[data-mapKey='+data.key+']').attr('title'));
+	jQuery.post(imgmap_ajax.ajaxurl, { 
+		action: 'imgmap_load_dialog_post',
+		id: data.key.replace('area-', '')
+		}, function(response) {
+		jQuery('#imgmap-dialog').html(response);
+		jQuery('#imgmap-dialog').dialog('open');
+	});
 }
 
