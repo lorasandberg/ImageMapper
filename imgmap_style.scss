@@ -1,0 +1,36 @@
+#image-area-canvas, #image-coord-canvas {
+	position: absolute; 
+	top: 0;
+}
+
+.delete-area {
+	float: right; 
+	cursor: pointer;
+}
+#imagemap-image {
+	 max-width: 100% 
+}
+
+.insert-media-imagemap {
+	cursor: pointer; 
+	position: relative; 
+	background-color: #000;
+	height: 125px; 
+	width: 125px; 
+	float: left; 
+	margin: 10px; 
+	border: 1px solid #333;
+	background-position: center center; 
+	background-size: contain; 
+	background-repeat: no-repeat;
+	
+	div {
+		position: absolute; 
+		bottom: 0; 
+		width: 100%;
+		background-color: rgba(255, 255, 255, 0.8);
+		height: 30px;
+		line-height: 30px;
+		text-align: center;
+	}
+}
