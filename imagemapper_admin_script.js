@@ -4,12 +4,16 @@ var Image;
 var Canvas, Ctx;
 var SavedAreasCanvas, SACtx;
 var Coords = [];
+var E = { 
+	Image: '#imagemap-image',
+	CoordCanvas: '#image-coord-canvas'
+	}
 
 jQuery(function() {
 	
-	if(jQuery('#image').length > 0) {
-		jQuery('#image').load(function() { jQuery(this).show(200); });
-		jQuery('#image-coord-canvas').click(imgClick);
+	if(jQuery(E.Image).length > 0) {
+		jQuery(E.Image).load(function() { jQuery(this).show(200); });
+		jQuery(E.CoordCanvas).click(imgClick);
 		jQuery('img[usemap]').mapster({
 			fillColor: 'ffffff',
 			fillOpacity: 0.4,
@@ -24,7 +28,6 @@ jQuery(function() {
 			onClick: AreaClicked
 		});
 		jQuery('#add-area-button').click(AddArea);
-		
 		var img = new Image();
 		img.onload = function() {
 			Image = { width: this.width, height: this.height };
@@ -34,12 +37,12 @@ jQuery(function() {
 			SavedAreasCanvas.height = Image.height;
 			
 			
-			jQuery(Canvas).width(jQuery('#image').width());
-			jQuery(Canvas).height(jQuery('#image').height());
-			jQuery(SavedAreasCanvas).width(jQuery('#image').width());
-			jQuery(SavedAreasCanvas).height(jQuery('#image').height());
+			jQuery(Canvas).width(jQuery(E.Image).width());
+			jQuery(Canvas).height(jQuery(E.Image).height());
+			jQuery(SavedAreasCanvas).width(jQuery(E.Image).width());
+			jQuery(SavedAreasCanvas).height(jQuery(E.Image).height());
 		};
-		img.src = jQuery('#image').attr('src');
+		img.src = jQuery(E.Image).attr('src');
 		
 		Canvas = document.getElementById('image-coord-canvas');
 		SavedAreasCanvas = document.getElementById('image-area-canvas');
@@ -52,7 +55,14 @@ jQuery(function() {
 		jQuery('.delete-area').click(DeleteArea);
 		
 	}
+	jQuery('.insert-media-imagemap').click(insertImageMap);
 });
+
+function insertImageMap() {
+	var img = jQuery(this).attr('data-imagemap');
+	window.parent.tb_remove();
+	window.parent.send_to_editor('[imagemap id="'+img+'"]');
+}
 
 function AreaClicked(data) {
 	console.log(data);
@@ -74,8 +84,8 @@ function AddCoords(x, y) {
 	}
 	
 	Coords.push({
-	x: Math.floor(x * (Image.width/jQuery('#image').width())),
-	y: Math.floor(y * (Image.height/jQuery('#image').height())),
+	x: Math.floor(x * (Image.width/jQuery('#imagemap-image').width())),
+	y: Math.floor(y * (Image.height/jQuery('#imagemap-image').height())),
 	id: ++coordinate_index
 	});
 	

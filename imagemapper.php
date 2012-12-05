@@ -3,7 +3,7 @@
 Plugin Name: ImageMapper
 Plugin URI: https://github.com/SpaikFi/ImageMapper
 Description: Create interactive and visual image maps with a visual editor! Based on the ImageMapster jQuery plugin.
-Version: 0.1
+Version: 0.2
 Author: A.Sandberg AKA Spike
 Author URI: http://spike.viuhka.fi
 License: GPL2
@@ -22,7 +22,15 @@ add_action('wp_ajax_imgmap_load_dialog_post', 'imgmap_load_dialog_post_ajax');
 add_action('wp_ajax_imgmap_get_area_coordinates', 'imgmap_get_area_coordinates_ajax');
 add_action('before_delete_post', 'imgmap_permanently_delete_imagemap');
 add_action('wp_trash_post', 'imgmap_trash_imagemap');
-add_action('imgmapper_frontend_image', 'imgmap_frontend_image');
+/* add_action('imgmapper_frontend_image', 'imgmap_frontend_image'); */
+add_action('admin_head', 'imgmap_load_tiny_mce');
+
+add_filter('the_content', 'imgmap_replace_shortcode');
+
+add_filter('media_upload_tabs', 'imgmap_media_upload_tab');
+add_action('media_upload_imagemap', 'imgmap_media_upload_tab_action');
+
+$image_maps = array();
 
 /* Creation of the custom post types 
  * Also script and stylesheet importing
@@ -63,13 +71,12 @@ function imgmap_create_post_type() {
 	/* Import ImageMapster and jQuery UI */
 	wp_register_script('imgmap_imagemapster', plugins_url() . '/imagemapper/script/jquery.imagemapster.min.js');
 	wp_register_style('jquery_ui', 'http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css');
+	wp_register_style('imgmap_style', plugins_url().'/imagemapper/imgmap_style.css');
 	wp_register_script('jquery_ui', 'http://code.jquery.com/ui/1.9.2/jquery-ui.js');
 	
 	/* Enqueue jQuery UI, jQuery and ImageMapster + jQueryu UI Stylesheet */
-	wp_enqueue_style('jquery_ui');
-	wp_enqueue_script('jquery');
-	wp_enqueue_script('jquery_ui');
-	wp_enqueue_script('imgmap_imagemapster');
+	wp_enqueue_style(array('jquery_ui', 'imgmap_style'));
+	wp_enqueue_script(array('jquery', 'jquery_ui', 'editor', 'editor_functions', 'imgmap_imagemapster'));
 	
 	/* The javascript file server needs to load for plugin's functionality depends on is the page is the admin panel or a frontend page */
 	/* (The frontend version obviously doesn't have for example the imagemap editor) */
@@ -83,6 +90,10 @@ function imgmap_create_post_type() {
 		wp_enqueue_script('imgmap_script');
 	}
 };
+
+function imgmap_load_tiny_mce() {
+	wp_tiny_mce(false, array('editor_selector' => 'content'));
+}
 
 /* To enable author to upload an image for the image map. */
 function imgmap_add_post_enctype() {
@@ -111,7 +122,7 @@ function imgmap_save_meta($id = false) {
 /* Add custom fields to the custom post type forms. 
  * */
 function imgmap_custom_form() {
-	add_meta_box('imagemap-image', 'Image', 'imgmap_form_image', IMAGEMAP_POST_TYPE, 'normal');
+	add_meta_box('imagemap-image-container', 'Image', 'imgmap_form_image', IMAGEMAP_POST_TYPE, 'normal');
 	add_meta_box('imagemap-addarea', 'Add area', 'imgmap_form_addarea', IMAGEMAP_POST_TYPE, 'side');
 	add_meta_box('imagemap-areas', 'Areas', 'imgmap_form_areas', IMAGEMAP_POST_TYPE, 'side');
 	
@@ -126,16 +137,16 @@ function imgmap_form_image($post) {
 	?>
 	<input type="file" name="imgmap_image" id="file" />
 	<div style="position: relative; margin-top: 30px">
-		<img src="<?php echo get_post_meta($post->ID, 'imgmap_image', true); ?>" usemap="#imgmap" id="image" style="max-width: 100%"  />
-		<canvas id="image-area-canvas" style="position: absolute; top: 0;"></canvas>
-		<canvas id="image-coord-canvas" style="position: absolute; top: 0;"></canvas>
+		<img src="<?php echo get_post_meta($post->ID, 'imgmap_image', true); ?>" usemap="#imgmap-<?php echo $post->ID ?>" id="imagemap-image" />
+		<canvas id="image-area-canvas"></canvas>
+		<canvas id="image-coord-canvas"></canvas>
 	</div>
 	<?php
 		
 		$areas = get_posts('post_parent='.$post->ID.'&post_type='.IMAGEMAP_AREA_POST_TYPE.'&numberposts=-1');
 		
 	?>
-	<map name="imgmap">
+	<map name="imgmap-<?php echo $post->ID ?>">
 		<?php
 			foreach($areas as $a) {
 				echo imgmap_create_area_element($a->ID, $a->post_title);
@@ -145,21 +156,49 @@ function imgmap_form_image($post) {
 	<?php
 }
 
-/* Displays the image map in a frontend page. */
-function imgmap_frontend_image($id) {
-	?>
-	<div id="imgmap-dialog">Hello world</div> <?php /* jQuery UI dialog */ ?>
-	<img src="<?php echo get_post_meta($id, 'imgmap_image', true); ?>" usemap="#imgmap" id="image" style="max-width: 100%"  />
-	<map name="imgmap">
+function imgmap_media_upload_tab($tabs) {
+	$newtab = array('imagemap' => __('Image map', 'imagemap'));
+	return array_merge($tabs, $newtab);
+}
+
+function imgmap_media_upload_tab_action() {
+	return wp_iframe('media_imgmap_media_upload_tab_inside');
+}
+
+function media_imgmap_media_upload_tab_inside() {
+	media_upload_header(); ?>
+	<p>
 		<?php
-			$areas = get_posts('post_parent='.$id.'&post_type='.IMAGEMAP_AREA_POST_TYPE.'&numberposts=-1');
-			foreach($areas as $a) {
-				echo imgmap_create_area_element($a->ID, $a->post_title);
-			}
+		$areas = get_posts('post_type='.IMAGEMAP_POST_TYPE.'&numberposts=-1');
+		foreach($areas as $a) { ?>
+			<div data-imagemap="<?php echo $a->ID; ?>" class="insert-media-imagemap" style="background-image: url(<?php echo get_post_meta($a->ID, 'imgmap_image', true); ?>);">
+				<div><?php echo $a->post_title ?></div>
+			</div>
+		<?php }
 		?>
-	</map>
+	</p>
 	<?php
 }
+
+/* Displays the image map in a frontend page. */
+function imgmap_frontend_image($id, $element_id) {
+	echo get_imgmap_frontend_image($id, $element_id);
+	}
+	
+function get_imgmap_frontend_image($id, $element_id) {
+	$value = '
+	<div class="imgmap-dialog" id="imgmap-dialog-'.$element_id.'">HLeello swwoolrd</div>
+	<img src="'.get_post_meta($id, 'imgmap_image', true).'" usemap="#imgmap-'.$element_id.'" id="imagemap-'.$element_id.'" />
+	<map name="imgmap-'.$element_id.'">';
+	$areas = get_posts('post_parent='.$id.'&post_type='.IMAGEMAP_AREA_POST_TYPE.'&numberposts=-1');
+	foreach($areas as $a) {
+		$value .= imgmap_create_area_element($a->ID, $a->post_title);
+	}
+	$value .= '</map>';
+	return $value;
+}
+
+
 /* Fields for adding new areas to the imagemap using the editor.
  * However the editor functionality is included in the image field. */
 function imgmap_form_addarea($post) {
@@ -241,7 +280,7 @@ function imgmap_create_list_element($id) {
 	'<li data-listkey="area-'.$id.'" class="area-list-element">
 	<input id="area-checkbox-'.$id.'" data-listkey="area-'.$id.'" type="checkbox" checked> '.
 	'<a href="'.get_edit_post_link($id).'">#'.($id) . ' area</a>'.
-	'<span style="float: right; cursor: pointer" class="delete-area" data-area="'.$id.'">Delete</a>'.
+	'<span class="delete-area" data-area="'.$id.'">Delete</a>'.
 	'</li>';
 }
 
@@ -313,4 +352,18 @@ function imgmap_delete_imagemap($post_id, $permanent) {
 		}
 	}
 }
+
+/* Insert image map code in posts */
+function imgmap_replace_shortcode($content) {
+	preg_match_all('/\[imagemap id=\"(.*?)\"\]/', $content, $maps);
+	foreach($maps[1] as $map) {
+		if(!isset($imagemaps[$map]))
+			$imagemaps[$map] = 0;
+		$imagemaps[$map]++;
+			
+		$content = preg_replace('/\[imagemap id=\"'.$map.'\"\]/', get_imgmap_frontend_image($map, $map.'-'.$imagemaps[$map]), $content, 1);
+	}
+	return $content;
+}
+
 ?>
