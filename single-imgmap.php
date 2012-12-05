@@ -4,9 +4,7 @@
 ?>
 
 <?php get_header(); ?>
-
-			<div id="content" role="main">
-				<?php do_action('imgmapper_frontend_image', get_the_ID()); ?>
-			</div><!-- #content -->
-
+	<div id="content" role="main">
+		<?php do_action('imgmapper_frontend_image', get_the_ID()); ?>
+	</div><!-- #content -->
 <?php get_footer(); ?>
