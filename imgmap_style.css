@@ -1,10 +1,7 @@
 #image-area-canvas, #image-coord-canvas {
   position: absolute;
-  top: 0; }
-
-.delete-area {
-  float: right;
-  cursor: pointer; }
+  top: 0;
+  left: 0; }
 
 #imagemap-image {
   max-width: 100%; }
@@ -29,3 +26,90 @@
     height: 30px;
     line-height: 30px;
     text-align: center; }
+
+.imgmap-color-picker {
+  display: none; }
+
+.imgmap-frontend-image {
+  position: relative; }
+  .imgmap-frontend-image img, .imgmap-frontend-image canvas {
+    max-width: 100% !important;
+    width: 100%;
+    height: 100%; }
+
+#imagemap-area-settings th {
+  text-align: left; }
+
+.area-type-editors {
+  display: none; }
+
+.area-type-editor-current {
+  display: block; }
+
+.area-list-element {
+  height: 50px;
+  position: relative;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #dedede;
+  padding-top: 15px; }
+  .area-list-element:hover {
+    background-color: white; }
+  .area-list-element label {
+    display: block;
+    width: 100%;
+    line-height: 25px; }
+    .area-list-element label input[type=text] {
+      float: right; }
+  .area-list-element .area-list-left {
+    float: left;
+    height: 100%;
+    line-height: 50px;
+    text-align: center;
+    width: 10%; }
+  .area-list-element .area-list-right {
+    float: right;
+    width: 80%; }
+  .area-list-element .area-list-meta {
+    padding: 10px 0;
+    width: 100%;
+    text-align: right; }
+    .area-list-element .area-list-meta a {
+      margin-left: 6px; }
+    .area-list-element .area-list-meta .delete-area {
+      color: #e12;
+      text-decoration: underline; }
+
+.imagemapper-tooltip {
+  position: absolute;
+  background-color: #fff;
+  padding: 8px;
+  border: 4px solid rgba(10, 10, 10, 0.4);
+  border-radius: 6px;
+  -moz-background-clip: padding;
+  /* Firefox 3.6 */
+  -webkit-background-clip: padding;
+  /* Safari 4? Chrome 6? */
+  background-clip: padding-box;
+  /* Firefox 4, Safari 5, Opera 10, IE 9 */ }
+
+.column-parent_image {
+  width: 102px; }
+
+.imagemap-column-image {
+  max-width: 100px;
+  max-height: 100px;
+  border: 1px solid #b4b4b4; }
+
+#imgmap-area-styles .imgmap-area-style {
+  background-image: url(transparency.png);
+  border: 1px solid #dedede;
+  overflow: hidden;
+  padding: 8px;
+  float: left;
+  margin: 4px;
+  cursor: pointer; }
+  #imgmap-area-styles .imgmap-area-style .imgmap-area-color {
+    width: 16px;
+    height: 16px; }
+#imgmap-area-styles .imgmap-area-style.chosen {
+  border: 1px solid rgba(200, 50, 70, 0.8); }

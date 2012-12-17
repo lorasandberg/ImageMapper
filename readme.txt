@@ -3,7 +3,7 @@ Contributors: spikefinned
 Tags: image map, images, interactive images
 Requires at least: 3.1
 Tested up to: 3.4.2
-Stable tag: 0.2
+Stable tag: 0.3
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,3 +40,9 @@ Features to be implemented in near future:
 = 0.2 =
 * Support for adding image maps in posts.
 * Support for multiple image maps.
+
+= 0.3 =
+* Fixed a bug which prevented inserting image map to the post with Insert media window in WordPress 3.5
+* Images of image maps in archive pages.
+* Click events: Possibility to choose if an area acts as a regular link, shows a tooltip when hovering or opens up a post content in a dialog.
+* Prevent adding an empty area or area with only two points.
